@@ -5,7 +5,6 @@ class ViewController: UIViewController, CalcInteractor {
     private lazy var calculator : CalcModel = CalcModel(interactor: self)
     @IBOutlet weak var textView: UITextView!
     @IBOutlet var numberButtons: [UIButton]!
-    
     func onError(message: String) {
         let alertVC = UIAlertController(title: "Zéro!", message: message, preferredStyle: .alert)
         alertVC.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
@@ -29,7 +28,6 @@ class ViewController: UIViewController, CalcInteractor {
         guard let numberText = sender.title(for: .normal) else {
             return
         }
-        
         self.calculator.tapped(number: numberText)
     }
     
@@ -45,6 +43,23 @@ class ViewController: UIViewController, CalcInteractor {
     @IBAction func tappedEqualButton(_ sender: UIButton) {
         self.calculator.makeOperation()
     }
-
+    
+    
+    @IBAction func tappedMultiplicationButton(_ sender: UIButton) {
+        self.calculator.tappedOpe(operand: "x")
+    }
+    
+    @IBAction func tappedDivisionButton(_ sender: Any) {
+        self.calculator.tappedOpe(operand: "/")
+    }
+    
+    
+    @IBAction func cleanAndClear(_ sender: Any) {
+        self.calculator.clear()
+    }
+    
+    @IBAction func clearLast(_ sender: Any) {
+        self.calculator.clearLast()
+    }
 }
 

@@ -39,22 +39,88 @@ class CalcModel {
     var expressionHaveResult: Bool {
         return self.text.firstIndex(of: "=") != nil
     }
+    var expressionDivCorrect: Bool {
+        for index in 0 ..< elements.count-1
+        {
+            print("itera : ",elements[index])
+            if elements[index]=="/" && elements[index+1]=="0"
+            {
+                return false
+            }
+            
+        }
+        return true
+    }
+
+    func clear(){
+        self.text = ""
+    }
+    
+    func clearLast(){
+        self.text.popLast()
+    }
     
     func tapped(number: String) {
         if expressionHaveResult {
             self.text = ""
-    
+            
         }
         self.text.append(number)
         
     }
-    
+
+
     func tappedOpe(operand: String) {
         if canAddOperator {
             self.text.append(" \(operand) ")
         } else {
             self.interactor.onError(message: "Impossible d'ajouter un opérateur")
         }
+    }
+    
+    
+    func priorityHandler(elements : [String]) -> [String]
+    {
+        var operationsToReduce=elements
+        print(operationsToReduce)
+        // Iterate over operations while an operand still here
+ 
+        var resFinal:[String]=[]
+        while operationsToReduce.count > 1 {
+            let left = Double(operationsToReduce[0])!
+            let operand = operationsToReduce[1]
+            let right = Double(operationsToReduce[2])!
+            
+            let result: Double
+            switch operand {
+            case "x":
+                result = left * right
+                operationsToReduce = Array(operationsToReduce.dropFirst(3))
+                operationsToReduce.insert("\(result)", at: 0)
+                
+            case "/":
+                result = left / right
+                operationsToReduce = Array(operationsToReduce.dropFirst(3))
+                operationsToReduce.insert("\(result)", at: 0)
+            case "+":
+                resFinal.append(String(left))
+                resFinal.append(String(operand))
+                operationsToReduce = Array(operationsToReduce.dropFirst(2))
+            case "-":
+                resFinal.append(String(left))
+                resFinal.append(String(operand))
+                operationsToReduce = Array(operationsToReduce.dropFirst(2))
+            default: fatalError("Unknown operator !")
+            }
+            
+            //print("op : ",operationsToReduce)
+            //print("res : ",resFinal)
+        }
+        resFinal.append(String(operationsToReduce[0]))
+        //print("op :: ",operationsToReduce)
+        //print("res :: ",resFinal)
+        return resFinal
+            
     }
     
     func makeOperation() {
@@ -67,19 +133,26 @@ class CalcModel {
             self.interactor.onError(message: "Démarrez un nouveau calcul !")
             return
         }
+        
+        guard expressionDivCorrect else {
+            self.interactor.onError(message: "Error Division sur 0, Entrez une expression correcte !")
+            return
+        }
         // Create local copy of operations
-        var operationsToReduce = elements
+        var operationsToReduce =  self.priorityHandler(elements: elements)
         
         // Iterate over operations while an operand still here
         while operationsToReduce.count > 1 {
-            let left = Int(operationsToReduce[0])!
+            let left = Double(operationsToReduce[0])!
             let operand = operationsToReduce[1]
-            let right = Int(operationsToReduce[2])!
+            let right = Double(operationsToReduce[2])!
             
-            let result: Int
+            let result: Double
             switch operand {
             case "+": result = left + right
             case "-": result = left - right
+            case "x": result = left * right
+            case "/": result = left / right
             default: fatalError("Unknown operator !")
             }
             
